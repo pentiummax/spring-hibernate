@@ -7,6 +7,7 @@ import org.hibernate.Transaction;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import javax.persistence.TypedQuery;
+import java.util.Collections;
 import java.util.List;
 
 @Repository
@@ -34,15 +35,26 @@ public class UserDaoImp implements UserDao {
    @Override
    @SuppressWarnings("unchecked")
    public List<User> listUsers() {
-      TypedQuery<User> query=sessionFactory.getCurrentSession().createQuery("from User");
-      return query.getResultList();
+      try (Session session = sessionFactory.openSession()) {
+         TypedQuery<User> query = session.createQuery("from User");
+         return query.getResultList();
+      } catch (Exception e) {
+         e.printStackTrace();
+      }
+      return Collections.EMPTY_LIST;
    }
 
    @Override
    public User getUserByCar(String model, int series) {
-      return (User) sessionFactory.getCurrentSession().createQuery("select user " +
-              "from User as user " +
-              "where user.car.model = '" + model +
-              "' and user.car.series = " + series).getSingleResult();
+      try (Session session = sessionFactory.openSession()) {
+         return (User) session.createQuery("select user " +
+                 "from User as user " +
+                 "where user.car.model = '" + model +
+                 "' and user.car.series = " + series).getSingleResult();
+
+      } catch (Exception e) {
+         e.printStackTrace();
+      }
+      return null;
    }
 }
