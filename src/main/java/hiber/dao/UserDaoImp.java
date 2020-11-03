@@ -3,7 +3,6 @@ package hiber.dao;
 import hiber.model.User;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
-import org.hibernate.Transaction;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import javax.persistence.TypedQuery;
@@ -18,17 +17,10 @@ public class UserDaoImp implements UserDao {
 
    @Override
    public void add(User user) {
-      Session session = sessionFactory.openSession();
-      final Transaction transaction = session.getTransaction();
-      transaction.begin();
-      try {
-         session.persist(user);
-         transaction.commit();
+      try (Session session = sessionFactory.openSession()) {
+         session.saveOrUpdate(user);
       } catch (Exception e) {
          e.printStackTrace();
-         transaction.rollback();
-      } finally {
-         session.close();
       }
    }
 
